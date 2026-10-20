@@ -1,0 +1,51 @@
+# --- Credentials: never commit these ---
+config.py
+*.key
+# ship only the templates
+!*.key.example
+
+# --- Scratch / coordination (not part of the release) ---
+.agents/
+
+# --- Runtime working data ---
+data/
+# per-day and overall extraction outputs
+OutputAnnotatedTexts-*.csv
+# generated ontologies (but keep the source preamble, which is read at run time)
+epidemicIE_*
+!epidemicIE_PREAMBLE.ttl
+
+# --- Caches ---
+cached/
+CACHE_*.json
+__pycache__/
+*.py[cod]
+
+# --- Logs and screen captures ---
+*.log
+screenlog*
+*.0
+
+# --- EIOS API metadata dumps (regenerated from the API) ---
+eios_api_filter_values.json
+eios_api_metadata.json
+
+# --- Editors / IDEs ---
+.idea/
+.vscode/
+*.iml
+.settings/
+.classpath
+.project
+
+# --- OS ---
+.DS_Store
+*.swp
+
+# --- Python environments ---
+.venv/
+venv/
+env/
+*.egg-info/
+build/
+dist/

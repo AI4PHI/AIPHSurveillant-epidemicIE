@@ -1,0 +1,763 @@
+@prefix : <http://data.jrc.ec.europa.eu/dataset/1ff56505-cd10-4cbf-9bd3-fdb500fe43db/> .
+@prefix ekg: <http://data.jrc.ec.europa.eu/ontology/ekg#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix terms: <http://purl.org/dc/terms/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix metadata: <http://data.bioontology.org/metadata/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dul: <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
+@prefix wdsr: <http://www.w3.org/2007/05/powder-s#> .
+@prefix vs: <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix locn: <http://www.w3.org/ns/locn#> .
+@prefix country: <http://publications.europa.eu/resource/authority/country/> .
+@prefix foundation: <http://data.europa.eu/h8v/ecmo/core/foundation/> .
+@prefix hazard: <http://data.europa.eu/h8v/ecmo/core/hazard/> .
+@prefix disaster: <http://data.europa.eu/h8v/ecmo/core/disaster/> .
+@prefix impact: <http://data.europa.eu/h8v/ecmo/core/impact/> .
+@prefix expvuln: <http://data.europa.eu/h8v/ecmo/core/expvuln/> .
+@prefix risk: <http://data.europa.eu/h8v/ecmo/core/risk/> .
+@prefix bio: <http://data.europa.eu/h8v/ecmo/bio/> .
+@prefix ph: <http://data.europa.eu/h8v/ecmo/public-health/> .
+@prefix eios: <http://data.europa.eu/h8v/ecmo/eios/> .
+
+@base <http://data.jrc.ec.europa.eu/dataset/1ff56505-cd10-4cbf-9bd3-fdb500fe43db/> .
+
+<http://data.jrc.ec.europa.eu/dataset/1ff56505-cd10-4cbf-9bd3-fdb500fe43db/> rdf:type owl:Ontology ;
+    owl:versionIRI <http://data.jrc.ec.europa.eu/dataset/1ff56505-cd10-4cbf-9bd3-fdb500fe43db/3.0> ;
+    dc:creator "European Commission, Joint Research Centre (JRC), Digital Health Unit, Ispra, Italy." ;
+    dc:description "This is an open source knowledge graph, conceived by the European Commission’s Joint Research Centre, created by the process of extraction of information of pandemic outbreak relevance via generative Artificial Intelligence models from the WHO Epidemic Intelligence from Open Source (EIOS) platform."@en ;
+    dc:language <http://publications.europa.eu/resource/authority/language/ENG> ;
+    dc:title "Epidemic knowledge graph (eKG)"@en ;
+    terms:issued "2024-08-15" ;
+    terms:license <https://creativecommons.org/licenses/by-sa/4.0/> ,
+                  <http://creativecommons.org/licenses/by/3.0/> ;
+    terms:modified "2026-09-09" ;
+    rdfs:comment "This is an open source knowledge graph, conceived by the European Commission’s Joint Research Centre, created by the process of extraction of information of pandemic outbreak relevance via generative Artificial Intelligence models from the WHO Epidemic Intelligence from Open Source (EIOS) platform."@en ;
+    rdfs:label "Epidemic knowledge graph (eKG)"@en ;
+    owl:versionInfo "Version 3.0"@en ;
+    skos:editorialNote """Version 3.0 restructures the schema to cover the fine-grained outbreak metadata produced by the
+fine-tuned extraction model EpiQwen3.5-9B (23 fields per outbreak). Each row of
+OutputAnnotatedTexts-FT-LLM-IterUpdate.csv describes ONE outbreak mentioned in ONE EIOS article and is
+mapped as follows onto the ECMO ontology network (https://data.europa.eu/h8v/ecmo/) and, where ECMO has
+no suitable term, onto newly minted terms in the ekg: namespace:
+
+  fileid                     -> ekg:MediaReport (subclass of foundation:Signal), dcterms:identifier / dcterms:source
+                                The identifier of an article is the shortened form of its fileid, where the prefixes
+                                M-, P- and D- stand for the EIOS Medical and Official, the ProMED and the WHO DONs
+                                corpora. The same string is the dcterms:identifier of every ekg:OutbreakEvent
+                                extracted from that article, so that events and report can be joined on the
+                                identifier and not only through foundation:hasSignal, while the rdfs:label of the
+                                event is its own record key, recordYYYYMMDD_<index>.
+  source_name_EIOS           -> ekg:hasSourceName on the report
+  source_id_EIOS             -> ekg:hasSourceIdentifier on the report
+  source_url_EIOS            -> ekg:hasSourceHomepage on the report
+                                The media outlet that published the article, as the EIOS api returns it in the
+                                "source" block of the item. The three of them are repeated in the rdfs:comment of
+                                the report, together with the EIOS collection it was harvested from.
+  date_pubDate_EIOS          -> dcterms:issued on the report, foundation:hasReportDate on the outbreak event
+  date_processedOnDate_EIOS  -> ekg:hasProcessingDate on the report
+  date_cases_IMPUTED         -> ekg:hasImputedReportDate on the outbreak event
+  texts_length               -> ekg:hasTextLength on the report
+  outbreak_index/n_outbreaks -> ekg:hasOutbreakIndex / ekg:hasReportedOutbreakCount
+  DiseaseLevel1              -> ekg:hasDiseaseLevel1 (subPropertyOf hazard:isManifestationOf) -> ph:InfectiousDiseaseOrSyndrome
+  DiseaseLevel2              -> ekg:hasDiseaseLevel2 (subPropertyOf hazard:isManifestationOf), skos:broader the level-1 concept
+  Country                    -> ekg:hasAffectedCountry (subPropertyOf foundation:hasLocation) -> ekg:Country (dul:Place)
+  ISO                        -> ekg:hasISO3CountryCode, owl:sameAs the EU country authority table entry
+  OutbreakEpicenter          -> ekg:hasOutbreakEpicenter (subPropertyOf foundation:hasLocation) -> ekg:SubnationalArea
+  CasesTotal/Suspected/      -> impact:HumanImpact reached via disaster:hasHumanImpact, carrying
+  Probable/Confirmed, Deaths    ekg:hasTotalCaseCount / hasSuspectedCaseCount / hasProbableCaseCount /
+                                hasConfirmedCaseCount / hasDeathCount
+  (derived)                  -> ph:CaseFatalityRate reached via ekg:hasCaseFatalityRate, carrying ph:hasCaseFatalityRateValue
+  OutbreakStart{Y,M,D}       -> ekg:hasOutbreakStartDate, and ekg:hasStartDate on the dul:TimeInterval
+                                reached via disaster:hasTemporalExtent
+  OutbreakEnd{Y,M,D}         -> ekg:hasOutbreakEndDate, and ekg:hasEndDate on the same dul:TimeInterval
+  OutbreakEnd (flag)         -> ekg:hasOutbreakEndDeclaration
+  OutbreakDetection{Y,M,D}   -> ekg:hasOutbreakDetectionDate, and ekg:OutbreakDetection reached via ekg:isDetectedBy
+  OutbreakVerification{Y,M,D}-> ekg:hasOutbreakVerificationDate, and foundation:EventValidation reached via
+                                foundation:isConfirmedBy
+
+The date milestones are published twice on purpose: as flat datatype properties on the outbreak event, for
+simple SPARQL access, and as reified ECMO/DUL structures (dul:TimeInterval, ekg:OutbreakDetection,
+foundation:EventValidation), for ontological conformance with hazard:HazardousEvent. Because the extraction
+often yields incomplete dates, all date properties of this ontology accept xsd:date, xsd:gYearMonth or
+xsd:gYear values."""@en .
+
+
+#################################################################
+#    External terms reused from the ECMO ontology network,
+#    DOLCE Ultralite, LOCN, SKOS and DCMI.
+#    They are re-declared here so that the eKG is self-contained.
+#################################################################
+
+
+### http://data.europa.eu/h8v/ecmo/core/hazard/Hazard
+hazard:Hazard a owl:Class,
+        owl:NamedIndividual,
+        skos:Concept ;
+    foundation:frameCluster foundation:F2 ;
+    foundation:scopeExclusion "This term does not include the occurrence or risk of armed conflicts and other situations of social instability or tension which are subject to international humanitarian law and national legislation."@en ;
+    foundation:sourceTermURL <https://www.undrr.org/terminology/hazard> ;
+    foundation:termNumber 21 ;
+    rdfs:comment "A process, phenomenon or human activity that may cause loss of life, injury or other health impacts, property damage, social and economic disruption or environmental degradation."@en ;
+    rdfs:subClassOf dul:ContextualDisposition,
+        dul:Description ;
+    skos:definition "A process, phenomenon or human activity that may cause loss of life, injury or other health impacts, property damage, social and economic disruption or environmental degradation."@en ;
+    skos:inScheme foundation:SendaiFrameworkTerminology ;
+    skos:narrower hazard:BiologicalHazard,
+        hazard:EnvironmentalHazard,
+        hazard:GeologicalHazard,
+        hazard:HydrometeorologicalHazard,
+        hazard:TechnologicalHazard ;
+    skos:prefLabel "Gefahr"@de,
+        "Hazard"@en,
+        "Amenaza"@es,
+        "Aléa"@fr,
+        "Pericolo"@it,
+        "Ameaça"@pt ;
+    skos:related hazard:HazardousEvent ;
+    skos:topConceptOf foundation:SendaiFrameworkTerminology .
+
+
+### http://data.europa.eu/h8v/ecmo/core/hazard/BiologicalHazard
+hazard:BiologicalHazard a hazard:Hazard,
+        owl:Class,
+        owl:NamedIndividual ;
+    rdfs:comment "A hazard of organic origin or conveyed by biological vectors, including pathogenic microorganisms, toxins and bioactive substances."@en ;
+    rdfs:subClassOf hazard:Hazard ;
+    skos:prefLabel "Biological Hazard"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/hazard/HazardousEvent
+hazard:HazardousEvent a owl:Class ;
+    rdfs:comment "The manifestation of a hazard in a particular place during a particular period of time."@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty foundation:hasLocation ;
+            owl:someValuesFrom dul:Place ],
+        [ a owl:Restriction ;
+            owl:onProperty disaster:hasTemporalExtent ;
+            owl:someValuesFrom dul:TimeInterval ],
+        [ a owl:Restriction ;
+            owl:onProperty hazard:isManifestationOf ;
+            owl:someValuesFrom hazard:Hazard ],
+        dul:Event,
+        dul:Situation ;
+    skos:broader hazard:Hazard ;
+    skos:prefLabel "Hazardous Event"@en .
+
+
+###  http://data.europa.eu/h8v/ecmo/core/hazard/BiologicalEvent
+hazard:BiologicalEvent a owl:Class ;
+    rdfs:comment "Hazards of organic origin or conveyed by biological vectors, including pathogenic microorganisms, toxins and bioactive substances."@en ;
+    rdfs:subClassOf hazard:HazardousEvent ;
+    owl:equivalentClass [ a owl:Restriction ;
+            owl:onProperty hazard:isManifestationOf ;
+            owl:someValuesFrom hazard:BiologicalHazard ] ;
+    skos:prefLabel "Biologisches Ereignis"@de,
+        "Biological Event"@en,
+        "Evento biológico"@es,
+        "Événement biologique"@fr,
+        "Evento biologico"@it,
+        "Evento biológico"@pt .
+
+
+###  http://data.europa.eu/h8v/ecmo/eios/PublicHealthEvent
+eios:PublicHealthEvent rdf:type owl:Class ;
+    rdfs:subClassOf dul:Event ;
+    rdfs:label "Public Health Event" ;
+    rdfs:comment "An occurrence that has or may have an impact on public health, detected through epidemic intelligence." .
+
+
+### http://data.europa.eu/h8v/ecmo/core/hazard/ObservationSource
+hazard:ObservationSource a owl:Class ;
+    rdfs:comment "The provenance of an observation: a scientific study, monitoring station, database, report, or expert assessment from which a measured value is drawn."@en ;
+    rdfs:subClassOf dul:InformationObject ;
+    skos:prefLabel "Observation Source"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/foundation/Signal
+foundation:Signal a owl:Class ;
+    rdfs:comment "An indication or anomaly detected in open-source data that may point to a potential public health event."@en ;
+    rdfs:subClassOf dul:InformationObject ;
+    skos:prefLabel "Signal"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/foundation/EventValidation
+foundation:EventValidation a owl:Class ;
+    rdfs:comment "The process of confirming the veracity and nature of a Signal to determine if it represents a real hazardous event."@en ;
+    rdfs:subClassOf dul:Process ;
+    skos:prefLabel "Event Validation"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/foundation/RiskAssessmentReport
+foundation:RiskAssessmentReport a owl:Class ;
+    rdfs:comment "A documented assessment of the risk posed by a hazardous event, including likelihood and impact analysis."@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty risk:assessesRisk ;
+            owl:someValuesFrom risk:Risk ],
+        dul:InformationObject ;
+    skos:prefLabel "Risikobewertungsbericht"@de,
+        "Risk Assessment Report"@en,
+        "Informe de evaluacion de riesgos"@es,
+        "Rapport d'evaluation des risques"@fr,
+        "Rapporto di valutazione del rischio"@it,
+        "Relatorio de avaliacao de riscos"@pt .
+
+
+### http://data.europa.eu/h8v/ecmo/core/impact/HumanImpact
+impact:HumanImpact a dul:Description,
+        owl:Class ;
+    rdfs:comment "Death, injuries, disease and other negative effects on human physical, mental and social well-being."@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:hasValue impact:HumanImpactType ;
+            owl:onProperty impact:hasImpactType ],
+        impact:Impact ;
+    skos:prefLabel "Human Impact"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/public-health/InfectiousDiseaseOrPathogen
+ph:InfectiousDiseaseOrPathogen a owl:Class ;
+    rdfs:comment "A class covering both infectious diseases and the pathogenic agents that cause them — the central node connecting the Pathogen frame to the Disease and Transmission frames."@en ;
+    rdfs:subClassOf hazard:BiologicalHazard ;
+    skos:prefLabel "Infectious Disease or Pathogen"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/public-health/InfectiousDiseaseOrSyndrome
+ph:InfectiousDiseaseOrSyndrome a owl:Class ;
+    rdfs:comment "An infectious disease or syndrome — a condition caused by a pathogenic agent, with identifiable clinical presentation, causative agent, and transmission route."@en ;
+    rdfs:subClassOf ph:DiseaseOrSyndrome,
+        ph:InfectiousDiseaseOrPathogen ;
+    skos:prefLabel "Infectious Disease or Syndrome"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/public-health/CaseFatalityRate
+ph:CaseFatalityRate a dul:Description,
+        owl:Class ;
+    rdfs:comment "A reified observation of the proportion of people diagnosed with a disease who die from it."@en ;
+    rdfs:subClassOf ph:PathogenRiskAssessment ;
+    skos:prefLabel "Case Fatality Rate"@en .
+
+
+### http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Place
+dul:Place a owl:Class ;
+    rdfs:comment "DOLCE Ultralite: a location, not necessarily with a specific geometry."@en ;
+    skos:prefLabel "Place"@en .
+
+
+### http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#TimeInterval
+dul:TimeInterval a owl:Class ;
+    rdfs:comment "DOLCE Ultralite: any region in a dimensional space that represents time."@en ;
+    skos:prefLabel "Time Interval"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/hazard/isManifestationOf
+hazard:isManifestationOf a owl:ObjectProperty ;
+    rdfs:comment "Fuses two roles: (1) subPropertyOf dul:hasQuality — the event has the hazard as an inhering contextual quality (ContextualQuality reading); (2) subPropertyOf dul:satisfies — the event (as dul:Situation) satisfies the hazard (as dul:Description), i.e. it is a concrete occurrence of that hazard type (D&S reading)."@en ;
+    rdfs:domain hazard:HazardousEvent ;
+    rdfs:range hazard:Hazard ;
+    rdfs:subPropertyOf dul:satisfies ;
+    skos:prefLabel "is manifestation of"@en,
+        "es manifestación de"@es,
+        "est la manifestation de"@fr,
+        "è manifestazione di"@it .
+
+
+###  http://data.europa.eu/h8v/ecmo/core/foundation/hasLocation
+foundation:hasLocation a owl:ObjectProperty ;
+    rdfs:comment "Relates a HazardousEvent or exposed entity to the dul:Place where it occurs or is situated."@en ;
+    rdfs:range dul:Place ;
+    owl:inverseOf foundation:isLocationOf ;
+    skos:prefLabel "has location"@en,
+        "ha luogo"@it .
+
+
+### http://data.europa.eu/h8v/ecmo/core/disaster/hasTemporalExtent
+disaster:hasTemporalExtent a owl:ObjectProperty ;
+    rdfs:comment "Relates a HazardousEvent or Disaster to the dul:TimeInterval over which it occurs or unfolds."@en ;
+    rdfs:domain hazard:HazardousEvent ;
+    rdfs:range dul:TimeInterval ;
+    skos:prefLabel "has temporal extent"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/disaster/hasHumanImpact
+disaster:hasHumanImpact a owl:ObjectProperty ;
+    rdfs:comment "Relates a Disaster to the HumanImpact — fatalities, injuries, displacement, health effects — it produces."@en ;
+    rdfs:domain hazard:HazardousEvent ;
+    rdfs:range impact:HumanImpact ;
+    skos:prefLabel "has human impact"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/foundation/hasSignal
+foundation:hasSignal a owl:ObjectProperty ;
+    rdfs:comment "Indicates that a hazardous event has been signalled."@en ;
+    owl:inverseOf foundation:pertainsToEvent ;
+    skos:prefLabel "has signal"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/foundation/isSignalFrom
+foundation:isSignalFrom a owl:ObjectProperty ;
+    rdfs:comment "Indicates the observation source that generated this signal."@en ;
+    rdfs:domain foundation:Signal ;
+    rdfs:range hazard:ObservationSource ;
+    owl:inverseOf foundation:generatesSignal ;
+    skos:prefLabel "is signal from"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/foundation/isConfirmedBy
+foundation:isConfirmedBy a owl:ObjectProperty ;
+    rdfs:comment "Indicates that a hazardous event has been confirmed by a validation process."@en ;
+    rdfs:domain hazard:HazardousEvent ;
+    rdfs:range foundation:EventValidation ;
+    owl:inverseOf foundation:confirmsEvent ;
+    skos:prefLabel "is confirmed by"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/core/foundation/confirmsEvent
+foundation:confirmsEvent a owl:ObjectProperty ;
+    rdfs:comment "Indicates that an event validation confirms a hazardous event."@en ;
+    rdfs:domain foundation:EventValidation ;
+    rdfs:range hazard:HazardousEvent ;
+    owl:inverseOf foundation:isConfirmedBy ;
+    skos:prefLabel "confirms event"@en .
+
+
+###  http://data.europa.eu/h8v/ecmo/core/foundation/hasReportDate
+###  NOTE: ECMO restricts the domain of this property to foundation:RiskAssessmentReport. The eKG widens it,
+###  since in the epidemic intelligence workflow the reporting date is a property of the reported event as
+###  much as of the report that carries it.
+foundation:hasReportDate a owl:DatatypeProperty ;
+    rdfs:comment "The date on which the event was reported, i.e. the publication date of the source article in EIOS."@en ;
+    rdfs:domain [ a owl:Class ;
+            owl:unionOf ( foundation:RiskAssessmentReport ekg:MediaReport ekg:OutbreakEvent ) ] ;
+    rdfs:range xsd:date ;
+    skos:editorialNote "Domain widened with respect to ECMO 0.2.2 by the eKG alignment."@en ;
+    skos:prefLabel "report date"@en .
+
+
+### http://data.europa.eu/h8v/ecmo/public-health/hasCaseFatalityRateValue
+ph:hasCaseFatalityRateValue a owl:DatatypeProperty ;
+    rdfs:comment "The numeric case fatality rate value, expressed as a proportion of the total reported cases."@en ;
+    rdfs:domain ph:CaseFatalityRate ;
+    rdfs:range xsd:decimal ;
+    skos:prefLabel "has case fatality rate value"@en .
+
+
+###  http://www.w3.org/ns/locn#geographicName
+locn:geographicName a rdf:Property ;
+    rdfs:label "geographic name"@en ;
+    dcterms:identifier "locn:geographicName"^^xsd:string ;
+    rdfs:comment """
+A geographic name is a proper noun applied to a spatial object. Taking the example used in the relevant INSPIRE data specification (page 18), the following are all valid geographic names for the Greek capital:
+- Αθήνα (the Greek endonym written in the Greek script)
+- Athína (the standard Romanisation of the endonym)
+- Athens (the English language exonym)
+For INSPIRE-conformant data, provide the metadata for the geographic name using a skos:Concept as a datatype.
+"""@en ;
+    rdfs:isDefinedBy <http://www.w3.org/ns/locn> ;
+    vs:term_status "testing"@en ;
+    wdsr:describedby <https://joinup.ec.europa.eu/node/55858> .
+
+
+###  http://www.w3.org/2004/02/skos/core#related
+skos:related rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf skos:semanticRelation ;
+             rdf:type owl:SymmetricProperty ;
+             rdfs:comment "skos:related is disjoint with skos:broaderTransitive"@en ;
+             rdfs:isDefinedBy <http://www.w3.org/2004/02/skos/core> ;
+             rdfs:label "has related"@en ;
+             skos:definition "Relates a concept to a concept with which there is an associative semantic relationship."@en .
+
+
+#################################################################
+#    eKG datatypes
+#################################################################
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#PartialDate
+ekg:PartialDate a rdfs:Datatype ;
+    rdfs:comment "A calendar date that may be incomplete: a full date (xsd:date) when day, month and year were all extracted, a year and month (xsd:gYearMonth) when the day is missing, or a year alone (xsd:gYear)."@en ;
+    owl:unionOf ( xsd:date xsd:gYearMonth xsd:gYear ) ;
+    skos:prefLabel "Partial Date"@en .
+
+
+#################################################################
+#    eKG classes
+#################################################################
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#OutbreakEvent
+ekg:OutbreakEvent a owl:Class ;
+    rdfs:comment "A disease outbreak reported in an epidemic intelligence source: the manifestation of a biological hazard (an infectious disease) in a given country, over a given period of time, with a reported human impact. One instance corresponds to one outbreak described in one source article."@en ;
+    rdfs:subClassOf hazard:BiologicalEvent,
+        eios:PublicHealthEvent ;
+    skos:prefLabel "Krankheitsausbruch"@de,
+        "Outbreak Event"@en,
+        "Brote epidémico"@es,
+        "Épidémie"@fr,
+        "Evento epidemico"@it .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#MediaReport
+ekg:MediaReport a owl:Class ;
+    rdfs:comment "An open-source article or official communication collected by the WHO EIOS platform, from which the outbreak information has been extracted. It is a foundation:Signal, i.e. an indication detected in open-source data that may point to a public health event."@en ;
+    rdfs:subClassOf foundation:Signal ;
+    skos:prefLabel "Medienbericht"@de,
+        "Media Report"@en,
+        "Rapport médiatique"@fr,
+        "Articolo di fonte aperta"@it .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#OutbreakDetection
+ekg:OutbreakDetection a owl:Class ;
+    rdfs:comment "The process by which an outbreak is first detected by the public health system, i.e. the moment the cluster of cases is recognised as an outbreak. It complements foundation:EventValidation, which covers the subsequent official verification."@en ;
+    rdfs:subClassOf dul:Process ;
+    skos:prefLabel "Outbreak Detection"@en,
+        "Rilevamento dell'epidemia"@it .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#Country
+ekg:Country a owl:Class ;
+    rdfs:comment "A country or territory affected by an outbreak, as named in the source article and, whenever the linking succeeds, aligned to GeoNames and to the EU country authority table."@en ;
+    rdfs:subClassOf dul:Place ;
+    skos:prefLabel "Land"@de,
+        "Country"@en,
+        "País"@es,
+        "Pays"@fr,
+        "Paese"@it .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#SubnationalArea
+ekg:SubnationalArea a owl:Class ;
+    rdfs:comment "A place inside a country — region, province, district, city or named locality — reported as the epicentre of an outbreak."@en ;
+    rdfs:subClassOf dul:Place ;
+    skos:prefLabel "Subnational Area"@en,
+        "Area subnazionale"@it .
+
+
+#################################################################
+#    eKG object properties
+#################################################################
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasDiseaseLevel1
+ekg:hasDiseaseLevel1 a owl:ObjectProperty ;
+    rdfs:comment "The primary (coarse-grained) disease or syndrome the outbreak is a manifestation of, as extracted from the source article."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ph:InfectiousDiseaseOrPathogen ;
+    rdfs:subPropertyOf hazard:isManifestationOf ;
+    skos:prefLabel "has disease (level 1)"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasDiseaseLevel2
+ekg:hasDiseaseLevel2 a owl:ObjectProperty ;
+    rdfs:comment "The secondary (fine-grained) disease, syndrome, serotype or clinical form specialising the level-1 disease of the outbreak, as extracted from the source article."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ph:InfectiousDiseaseOrPathogen ;
+    rdfs:subPropertyOf hazard:isManifestationOf ;
+    skos:prefLabel "has disease (level 2)"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasAffectedCountry
+ekg:hasAffectedCountry a owl:ObjectProperty ;
+    rdfs:comment "The country or territory in which the outbreak occurred."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ekg:Country ;
+    rdfs:subPropertyOf foundation:hasLocation ;
+    skos:prefLabel "has affected country"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasOutbreakEpicenter
+ekg:hasOutbreakEpicenter a owl:ObjectProperty ;
+    rdfs:comment "The subnational place reported as the epicentre of the outbreak."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ekg:SubnationalArea ;
+    rdfs:subPropertyOf foundation:hasLocation ;
+    skos:prefLabel "has outbreak epicenter"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasCaseFatalityRate
+ekg:hasCaseFatalityRate a owl:ObjectProperty ;
+    rdfs:comment "Relates the outbreak to a reified ph:CaseFatalityRate observation, derived from the reported deaths over the reported total cases. It is deliberately NOT a subproperty of ph:hasCaseFatalityRate, whose domain is the biological hazard: here the rate characterises one single outbreak, not the pathogen in general."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ph:CaseFatalityRate ;
+    skos:prefLabel "has case fatality rate"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#isDetectedBy
+ekg:isDetectedBy a owl:ObjectProperty ;
+    rdfs:comment "Relates the outbreak to the detection process that first recognised it."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ekg:OutbreakDetection ;
+    owl:inverseOf ekg:detectsEvent ;
+    skos:prefLabel "is detected by"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#detectsEvent
+ekg:detectsEvent a owl:ObjectProperty ;
+    rdfs:comment "Relates a detection process to the outbreak it recognised."@en ;
+    rdfs:domain ekg:OutbreakDetection ;
+    rdfs:range ekg:OutbreakEvent ;
+    owl:inverseOf ekg:isDetectedBy ;
+    skos:prefLabel "detects event"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasSourceHomepage
+ekg:hasSourceHomepage a owl:ObjectProperty ;
+    rdfs:comment "Home page of the media outlet that published the article, as the WHO EIOS api returns it in the \"url\" field of the \"source\" block of the item (e.g. <http://www.example-daily.com/> for the outlet \"Example Daily\"). It is the site of the outlet, not the address of the article itself, which is published as dcterms:source."@en ;
+    rdfs:domain ekg:MediaReport ;
+    skos:prefLabel "has source homepage"@en .
+
+
+#################################################################
+#    eKG datatype properties - human impact
+#################################################################
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasCaseCount
+ekg:hasCaseCount a owl:DatatypeProperty ;
+    rdfs:comment "Superproperty of every reported case count of an outbreak. ECMO 0.2.2 offers no case-count property (expvuln:hasExposedPopulationCount describes exposure, not morbidity), hence this family of properties is minted by the eKG."@en ;
+    rdfs:domain impact:HumanImpact ;
+    rdfs:range xsd:nonNegativeInteger ;
+    skos:prefLabel "has case count"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasTotalCaseCount
+ekg:hasTotalCaseCount a owl:DatatypeProperty ;
+    rdfs:comment "Total number of cases reported for the outbreak, whether suspected, probable or confirmed."@en ;
+    rdfs:domain impact:HumanImpact ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:subPropertyOf ekg:hasCaseCount ;
+    skos:prefLabel "has total case count"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasSuspectedCaseCount
+ekg:hasSuspectedCaseCount a owl:DatatypeProperty ;
+    rdfs:comment "Number of suspected cases reported for the outbreak."@en ;
+    rdfs:domain impact:HumanImpact ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:subPropertyOf ekg:hasCaseCount ;
+    skos:prefLabel "has suspected case count"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasProbableCaseCount
+ekg:hasProbableCaseCount a owl:DatatypeProperty ;
+    rdfs:comment "Number of probable cases reported for the outbreak."@en ;
+    rdfs:domain impact:HumanImpact ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:subPropertyOf ekg:hasCaseCount ;
+    skos:prefLabel "has probable case count"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasConfirmedCaseCount
+ekg:hasConfirmedCaseCount a owl:DatatypeProperty ;
+    rdfs:comment "Number of laboratory-confirmed cases reported for the outbreak."@en ;
+    rdfs:domain impact:HumanImpact ;
+    rdfs:range xsd:nonNegativeInteger ;
+    rdfs:subPropertyOf ekg:hasCaseCount ;
+    skos:prefLabel "has confirmed case count"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasDeathCount
+ekg:hasDeathCount a owl:DatatypeProperty ;
+    rdfs:comment "Number of deaths reported for the outbreak."@en ;
+    rdfs:domain impact:HumanImpact ;
+    rdfs:range xsd:nonNegativeInteger ;
+    skos:prefLabel "has death count"@en .
+
+
+#################################################################
+#    eKG datatype properties - outbreak timeline
+#################################################################
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasOutbreakStartDate
+ekg:hasOutbreakStartDate a owl:DatatypeProperty ;
+    rdfs:comment "Date on which the outbreak started, i.e. the onset of the first reported case. Built from the OutbreakStartYear/Month/Day fields and therefore possibly incomplete."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ekg:PartialDate ;
+    skos:prefLabel "has outbreak start date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasOutbreakDetectionDate
+ekg:hasOutbreakDetectionDate a owl:DatatypeProperty ;
+    rdfs:comment "Date on which the outbreak was detected by the public health system. Built from the OutbreakDetectionYear/Month/Day fields and therefore possibly incomplete."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ekg:PartialDate ;
+    skos:prefLabel "has outbreak detection date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasOutbreakVerificationDate
+ekg:hasOutbreakVerificationDate a owl:DatatypeProperty ;
+    rdfs:comment "Date on which the outbreak was officially verified. Built from the OutbreakVerificationYear/Month/Day fields and therefore possibly incomplete."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ekg:PartialDate ;
+    skos:prefLabel "has outbreak verification date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasOutbreakEndDate
+ekg:hasOutbreakEndDate a owl:DatatypeProperty ;
+    rdfs:comment "Date on which the outbreak was declared over. Built from the OutbreakEndYear/Month/Day fields and therefore possibly incomplete."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range ekg:PartialDate ;
+    skos:prefLabel "has outbreak end date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasOutbreakEndDeclaration
+ekg:hasOutbreakEndDeclaration a owl:DatatypeProperty ;
+    rdfs:comment "Verbatim value of the OutbreakEnd field, stating whether the source article declares the outbreak over (typically \"yes\")."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range xsd:string ;
+    skos:prefLabel "has outbreak end declaration"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasStartDate
+ekg:hasStartDate a owl:DatatypeProperty ;
+    rdfs:comment "Beginning of a time interval. It intentionally does not specialise dul:hasIntervalDate, whose range is restricted to xsd:dateTime, because the extracted dates are frequently incomplete."@en ;
+    rdfs:domain dul:TimeInterval ;
+    rdfs:range ekg:PartialDate ;
+    skos:prefLabel "has start date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasEndDate
+ekg:hasEndDate a owl:DatatypeProperty ;
+    rdfs:comment "End of a time interval. It intentionally does not specialise dul:hasIntervalDate, whose range is restricted to xsd:dateTime, because the extracted dates are frequently incomplete."@en ;
+    rdfs:domain dul:TimeInterval ;
+    rdfs:range ekg:PartialDate ;
+    skos:prefLabel "has end date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasDetectionDate
+ekg:hasDetectionDate a owl:DatatypeProperty ;
+    rdfs:comment "Date on which the detection process recognised the outbreak."@en ;
+    rdfs:domain ekg:OutbreakDetection ;
+    rdfs:range ekg:PartialDate ;
+    skos:prefLabel "has detection date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasValidationDate
+ekg:hasValidationDate a owl:DatatypeProperty ;
+    rdfs:comment "Date on which the validation process verified the event."@en ;
+    rdfs:domain foundation:EventValidation ;
+    rdfs:range ekg:PartialDate ;
+    skos:prefLabel "has validation date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasImputedReportDate
+ekg:hasImputedReportDate a owl:DatatypeProperty ;
+    rdfs:comment "Reporting date attributed to the outbreak by the pipeline when the source article carries no usable publication date (column date_cases_IMPUTED)."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range xsd:date ;
+    skos:prefLabel "has imputed report date"@en .
+
+
+#################################################################
+#    eKG datatype properties - places, sources and provenance
+#################################################################
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasISO3CountryCode
+ekg:hasISO3CountryCode a owl:DatatypeProperty ;
+    rdfs:comment "ISO 3166-1 alpha-3 code of the affected country, as extracted from the source article (e.g. \"BRA\" for Brazil)."@en ;
+    rdfs:domain ekg:Country ;
+    rdfs:range xsd:string ;
+    skos:prefLabel "has ISO 3166-1 alpha-3 code"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasProcessingDate
+ekg:hasProcessingDate a owl:DatatypeProperty ;
+    rdfs:comment "Date on which the WHO EIOS platform processed the article (processedOnDate)."@en ;
+    rdfs:domain ekg:MediaReport ;
+    rdfs:range xsd:date ;
+    skos:prefLabel "has processing date"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasSourceName
+ekg:hasSourceName a owl:DatatypeProperty ;
+    rdfs:comment "Name of the media outlet that published the article, as the WHO EIOS api returns it in the \"name\" field of the \"source\" block of the item (e.g. \"Example Daily\")."@en ;
+    rdfs:domain ekg:MediaReport ;
+    rdfs:range xsd:string ;
+    skos:prefLabel "has source name"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasSourceIdentifier
+ekg:hasSourceIdentifier a owl:DatatypeProperty ;
+    rdfs:comment "Identifier of the media outlet inside the WHO EIOS platform, as the api returns it in the \"id\" field of the \"source\" block of the item (e.g. \"example-daily\"). It is also the first part of the identifier of every article of that outlet."@en ;
+    rdfs:domain ekg:MediaReport ;
+    rdfs:range xsd:string ;
+    skos:prefLabel "has source identifier"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasTextLength
+ekg:hasTextLength a owl:DatatypeProperty ;
+    rdfs:comment "Number of characters of the article text submitted to the extraction model."@en ;
+    rdfs:domain ekg:MediaReport ;
+    rdfs:range xsd:integer ;
+    skos:prefLabel "has text length"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasOutbreakIndex
+ekg:hasOutbreakIndex a owl:DatatypeProperty ;
+    rdfs:comment "Zero-based position of this outbreak in the list of outbreaks extracted from its source article."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range xsd:integer ;
+    skos:prefLabel "has outbreak index"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasReportedOutbreakCount
+ekg:hasReportedOutbreakCount a owl:DatatypeProperty ;
+    rdfs:comment "Number of distinct outbreaks extracted from the source article this outbreak comes from."@en ;
+    rdfs:domain ekg:OutbreakEvent ;
+    rdfs:range xsd:integer ;
+    skos:prefLabel "has reported outbreak count"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#hasExtractionModel
+ekg:hasExtractionModel a owl:DatatypeProperty ;
+    rdfs:comment "Identifier of the generative model that extracted the outbreak metadata from the source text."@en ;
+    rdfs:range xsd:string ;
+    skos:prefLabel "has extraction model"@en .
+
+
+#################################################################
+#    Individuals - the epidemic intelligence observation sources
+#################################################################
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#EIOSSource
+ekg:EIOSSource a hazard:ObservationSource,
+        owl:NamedIndividual ;
+    rdfs:comment "The WHO Epidemic Intelligence from Open Sources (EIOS) platform, from which the articles of the eKG are collected."@en ;
+    rdfs:label "WHO EIOS" ;
+    skos:prefLabel "WHO Epidemic Intelligence from Open Sources"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#EIOSMedicalOfficialSource
+ekg:EIOSMedicalOfficialSource a hazard:ObservationSource,
+        owl:NamedIndividual ;
+    rdfs:comment "The Medical and Official sources category of the WHO EIOS platform, queried through the getMedicalOfficialArticles endpoint."@en ;
+    rdfs:label "EIOS Medical and Official sources" ;
+    skos:broader ekg:EIOSSource ;
+    skos:prefLabel "EIOS Medical and Official sources"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#WHODONSource
+ekg:WHODONSource a hazard:ObservationSource,
+        owl:NamedIndividual ;
+    rdfs:comment "The WHO Disease Outbreak News (DONs), the official WHO outbreak communication channel."@en ;
+    rdfs:label "WHO Disease Outbreak News (DONs)" ;
+    skos:broader ekg:EIOSSource ;
+    skos:prefLabel "WHO Disease Outbreak News"@en .
+
+
+###  http://data.jrc.ec.europa.eu/ontology/ekg#ProMEDSource
+ekg:ProMEDSource a hazard:ObservationSource,
+        owl:NamedIndividual ;
+    rdfs:comment "ProMED-mail, the Program for Monitoring Emerging Diseases of the International Society for Infectious Diseases."@en ;
+    rdfs:label "ProMED-mail" ;
+    skos:broader ekg:EIOSSource ;
+    skos:prefLabel "ProMED-mail"@en .

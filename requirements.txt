@@ -1,0 +1,285 @@
+# Exact package set of the conda environment "epidemic-ie", the environment the EIOS epidemic
+# information-extraction pipeline is run with (see environment.yml for the full conda export,
+# including the conda-provided Python 3.12.3 and system libraries).
+#
+# Platform this was frozen on: Linux aarch64 with a CUDA 13.0 GPU.
+# torch is the CUDA 13.0 build, which is NOT on PyPI: install it from the PyTorch index, e.g.
+#     pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu130
+# On a different platform, drop the "+cu130" local version of torch and pick the build matching the
+# local CUDA (or the CPU one).
+#
+# Direct dependencies of the scripts (everything else is a transitive dependency):
+#   torch, transformers, peft, bitsandbytes, accelerate  -> the fine-tuned extraction model
+#   pandas, numpy                                        -> the extraction dataframes/CSVs
+#   rdflib, SPARQLWrapper                                -> ontology generation and entity linking
+#   requests, joblib                                     -> REST calls to GeoNames/BioPortal/Virtuoso
+#                                                           and the on-disk cache of the SPARQL queries
+#   schedule                                             -> SCHEDULE-RUN_AutomatedDynamicPipeline.py
+#   python-dateutil, tqdm, openai, tiktoken              -> date parsing, progress bars, legacy LLM calls
+#
+# Frozen again on 2026-10-12, when the environment was upgraded for the extraction model
+# jattokatarratto/EpiQwen3.5-9B: its base model Qwen/Qwen3.5-9B is only known to transformers from
+# 5.17.0 on (class Qwen3_5ForConditionalGeneration), so the four framework versions of the model
+# card (README.md) are now the ones installed here:
+#     transformers==5.17.0   torch==2.14.0   peft==0.21.0   accelerate==1.15.0
+# (torch 2.14 is also the first build supporting the compute capability 12.1 of the GB10; the
+# previous set was transformers 4.56.1 / torch 2.9.0 / peft 0.17.1 / accelerate 1.10.1, with which
+# the previous model AI4PH/EpiQwen2.5-7B was run.)
+# bitsandbytes is no longer needed by the extraction itself (EpiQwen3.5-9B is served in bf16, with
+# the LoRA adapter merged into the base model); it is kept for the legacy 4-bit path, which is still
+# used if the pipeline is pointed back at a fine-tune without serving_prompt_format.json.
+# Optional kernels: transformers suggests causal_conv1d and flash-linear-attention for the Gated
+# DeltaNet layers of Qwen3.5. flash-linear-attention was tested on this machine and made no
+# difference (21.1 vs 21.7 s per article, identical output), so it is deliberately NOT installed.
+accelerate==1.15.0
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.3
+aiosignal==1.4.0
+albucore==0.0.24
+albumentations==2.0.8
+annotated-doc==0.0.5
+annotated-types==0.7.0
+anyio==4.12.1
+argon2-cffi==25.1.0
+argon2-cffi-bindings==25.1.0
+arrow==1.4.0
+asttokens==3.0.1
+async-lru==2.1.0
+attrs==25.4.0
+babel==2.17.0
+backports.zstd==1.7.0
+beautifulsoup4==4.14.3
+bitsandbytes==0.50.2
+bleach==6.3.0
+blinker==1.9.0
+brotli==1.2.0
+certifi==2026.1.4
+cffi==2.0.0
+charset-normalizer==3.4.4
+choreographer==1.3.0
+click==8.5.0
+cloudpickle==3.1.2
+comm==0.2.3
+contourpy==1.3.3
+cuda-bindings==13.4.3
+cuda-pathfinder==1.8.3
+cuda-toolkit==13.0.3.0
+cycler==0.12.1
+dash==4.4.1
+dash-bootstrap-components==2.0.4
+dask==2025.9.1
+datasets==4.1.0
+debugpy==1.8.19
+decorator==5.2.1
+defusedxml==0.7.1
+diffusers==0.35.1
+dill==0.4.0
+distro==1.9.0
+docker==7.1.0
+dtale==3.22.0
+einops==0.8.2
+et_xmlfile==2.0.0
+evaluate==0.4.6
+executing==2.2.1
+fastjsonschema==2.21.2
+filelock==3.20.3
+Flask==3.1.3
+Flask-Compress==1.24
+fonttools==4.61.1
+formulaic==1.2.2
+fqdn==1.5.1
+frozenlist==1.8.0
+fsspec==2025.9.0
+future==1.0.0
+greenlet==3.5.5
+h11==0.16.0
+hf-xet==1.7.0
+httpcore==1.0.9
+httpcore2==2.12.0
+httpx==0.28.1
+httpx2==2.12.0
+huggingface-hub==1.33.0
+idna==3.19
+importlib_metadata==8.7.1
+interface_meta==2.0.1
+ipykernel==6.31.0
+ipython==9.9.0
+ipython_pygments_lexers==1.1.1
+ipywidgets==8.1.7
+isoduration==20.11.0
+itsdangerous==2.2.0
+janus==2.0.0
+jedi==0.19.2
+Jinja2==3.1.6
+joblib==1.5.3
+json5==0.13.0
+jsonpatch==1.33
+jsonpointer==3.0.0
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+jupyter-events==0.12.0
+jupyter-lsp==2.3.0
+jupyter_client==8.8.0
+jupyter_core==5.9.1
+jupyter_server==2.17.0
+jupyter_server_terminals==0.5.4
+jupyterlab==4.4.7
+jupyterlab_nvdashboard==0.13.0
+jupyterlab_nvidia_nsight==0.7.0
+jupyterlab_pygments==0.3.0
+jupyterlab_server==2.28.0
+jupyterlab_widgets==3.0.16
+kaleido==1.4.0
+kiwisolver==1.4.9
+langchain==0.3.30
+langchain-core==0.3.86
+langchain-text-splitters==0.3.11
+langsmith==0.12.2
+lark==1.3.1
+lightgbm==4.6.0
+locket==1.0.0
+logistro==2.0.1
+lz4==4.4.5
+markdown-it-py==4.2.0
+MarkupSafe==3.0.3
+matplotlib==3.10.6
+matplotlib-inline==0.2.1
+mdurl==0.1.2
+missingno==0.5.2
+mistune==3.2.0
+mpmath==1.3.0
+multidict==6.7.1
+multiprocess==0.70.16
+narwhals==2.15.0
+nbclient==0.10.4
+nbconvert==7.17.0
+nbformat==5.10.4
+nest-asyncio==1.6.0
+networkx==3.6.1
+nltk==3.10.3
+notebook_shim==0.2.4
+numpy==2.1.0
+nvidia-cublas==13.1.1.3
+nvidia-cuda-cupti==13.0.85
+nvidia-cuda-nvrtc==13.0.88
+nvidia-cuda-runtime==13.0.96
+nvidia-cudnn-cu13==9.24.0.43
+nvidia-cufft==12.0.0.61
+nvidia-cufile==1.15.1.6
+nvidia-curand==10.4.0.35
+nvidia-cusolver==12.0.4.66
+nvidia-cusparse==12.6.3.3
+nvidia-cusparselt-cu13==0.8.1
+nvidia-ml-py==12.575.51
+nvidia-nccl-cu13==2.30.7
+nvidia-nvjitlink==13.4.92
+nvidia-nvshmem-cu13==3.4.5
+nvidia-nvtx==13.0.85
+openai==0.28.1
+opencv-python-headless==4.12.0.88
+openpyxl==3.1.5
+orjson==3.12.0
+packaging==25.0
+pandas==2.3.2
+pandocfilters==1.5.1
+parso==0.8.5
+partd==1.4.2
+patsy==1.0.3
+peft==0.21.0
+pexpect==4.9.0
+pillow==11.3.0
+pkginfo==1.13
+platformdirs==4.5.1
+plotly==6.3.0
+polars==1.33.1
+prometheus_client==0.24.1
+prompt_toolkit==3.0.52
+propcache==0.4.1
+psutil==7.2.2
+ptyprocess==0.7.0
+pure_eval==0.2.3
+pyarrow==23.0.0
+pycparser==3.0
+pydantic==2.12.5
+pydantic_core==2.41.5
+Pygments==2.19.2
+pynvml==12.0.0
+pyparsing==3.3.2
+python-dateutil==2.9.0.post0
+python-json-logger==4.0.0
+pytz==2025.2
+PyYAML==6.0.3
+pyzmq==27.1.0
+rdflib==7.6.0
+referencing==0.37.0
+regex==2026.1.15
+requests==2.32.5
+requests-toolbelt==1.0.0
+retrying==1.4.2
+rfc3339-validator==0.1.4
+rfc3986-validator==0.1.1
+rfc3987-syntax==1.1.0
+rich==15.0.0
+rpds-py==0.30.0
+safetensors==0.8.0
+schedule==1.2.2
+scikit-learn==1.7.1
+scipy==1.17.0
+seaborn==0.13.2
+Send2Trash==2.1.0
+sentence-transformers==5.7.0
+setuptools==80.10.1
+shellingham==1.5.4
+simplejson==4.1.2
+simsimd==6.5.12
+six==1.17.0
+sniffio==1.3.1
+soupsieve==2.8.3
+SPARQLWrapper==2.0.0
+SQLAlchemy==2.0.52
+squarify==0.4.4
+stack-data==0.6.3
+statsmodels==0.15.0
+stringzilla==4.6.0
+strsimpy==0.2.1
+sympy==1.14.0
+tenacity==9.1.4
+terminado==0.18.1
+threadpoolctl==3.6.0
+tiktoken==0.14.0
+tinycss2==1.4.0
+tokenizers==0.23.3
+toolz==1.1.0
+torch==2.14.0+cu130
+torchvision==0.29.0+cu130
+tornado==6.5.4
+tqdm==4.67.1
+traitlets==5.14.3
+transformers==5.17.0
+triton==3.8.0
+trl==0.19.1
+truststore==0.10.4
+typer==0.27.3
+typing-inspection==0.4.2
+typing_extensions==4.15.0
+tzdata==2025.3
+uri-template==1.3.0
+urllib3==2.6.3
+uuid_utils==0.17.1
+view-df==0.2.8
+wcwidth==0.5.0
+webcolors==25.10.0
+webencodings==0.5.1
+websocket-client==1.9.0
+websockets==17.1
+Werkzeug==3.1.8
+wheel==0.46.3
+widgetsnbextension==4.0.15
+wrapt==2.4.0
+xarray==2026.7.0
+xgboost==3.0.5
+xlrd==2.0.2
+xxhash==3.6.0
+yarl==1.22.0
+zipp==3.23.0
+zstandard==0.25.0

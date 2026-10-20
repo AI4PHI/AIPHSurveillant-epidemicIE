@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the accompanying paper below."
+title: "Epidemic Information-Extraction Pipeline: from outbreak reports to a daily-updated epidemiological knowledge graph"
+type: software
+authors:
+  - family-names: Consoli
+    given-names: Sergio
+    affiliation: "European Commission, Joint Research Centre (JRC)"
+  - family-names: Bertolini
+    given-names: Lorenzo
+    affiliation: "European Commission, Joint Research Centre (JRC)"
+  - family-names: Biazzo
+    given-names: Indaco
+    affiliation: "European Commission, Joint Research Centre (JRC)"
+  - family-names: Muraro
+    given-names: Davide
+    affiliation: "European Commission, Joint Research Centre (JRC)"
+  - family-names: Schuh
+    given-names: Lea
+    affiliation: "European Commission, Joint Research Centre (JRC)"
+  - family-names: Stilianakis
+    given-names: Nikolaos I.
+    affiliation: "European Commission, Joint Research Centre (JRC)"
+license: EUPL-1.2
+year: 2026
+# Publication status: submitted to Frontiers in Public Health (no DOI assigned yet).
+preferred-citation:
+  type: article
+  title: "From Outbreak Reports to a Daily-Updated Epidemiological Knowledge Graph"
+  authors:
+    - family-names: Consoli
+      given-names: Sergio
+      affiliation: "European Commission, Joint Research Centre (JRC)"
+    - family-names: Bertolini
+      given-names: Lorenzo
+      affiliation: "European Commission, Joint Research Centre (JRC)"
+    - family-names: Biazzo
+      given-names: Indaco
+      affiliation: "European Commission, Joint Research Centre (JRC)"
+    - family-names: Muraro
+      given-names: Davide
+      affiliation: "European Commission, Joint Research Centre (JRC)"
+    - family-names: Schuh
+      given-names: Lea
+      affiliation: "European Commission, Joint Research Centre (JRC)"
+    - family-names: Stilianakis
+      given-names: Nikolaos I.
+      affiliation: "European Commission, Joint Research Centre (JRC)"
+  year: 2026
+  notes: "Submitted to Frontiers in Public Health. DOI to be assigned upon publication."
