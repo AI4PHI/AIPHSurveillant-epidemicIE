@@ -49,3 +49,6 @@ env/
 *.egg-info/
 build/
 dist/
+
+# Internal sanitization/review artifact, not part of the public release
+SANITIZATION_REPORT.md

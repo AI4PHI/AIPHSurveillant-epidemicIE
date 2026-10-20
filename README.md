@@ -1,4 +1,4 @@
-# Epidemic Information-Extraction Pipeline
+# AI Public Health Surveillant - Epidemic Information-Extraction Pipeline
 
 > **License note:** this repository is released under the **EUPL-1.2** (see [`LICENSE`](LICENSE)).
 > Please confirm that this is the license intended for publication before distributing.
@@ -12,7 +12,8 @@ entity linking of diseases and places to external resources. The graph is publis
 JRC Data Catalogue.
 
 This repository accompanies the paper *From Outbreak Reports to a Daily-Updated Epidemiological
-Knowledge Graph* (Consoli et al.; see [Citation](#citation)).
+Knowledge Graph* (Consoli et al.; see [Citation](#citation)). The source code is hosted at
+<https://github.com/AI4PHI/AIPHSurveillant-epidemicIE>.
 
 ## Why local inference
 
