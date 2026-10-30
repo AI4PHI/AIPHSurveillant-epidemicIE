@@ -166,7 +166,7 @@ python tests/eios_api_test_extractions.py
 This repository accompanies:
 
 > Consoli, S., Bertolini, L., Biazzo, I., Muraro, D., Schuh, L., & Stilianakis, N. I. (2026).
-> *From Outbreak Reports to a Daily-Updated Epidemiological Knowledge Graph.*
+> *From Outbreak Reports to a Daily-Updated Epidemiological Knowledge Graph: Fine-Tuned Large Language Models for Event-Based Epidemic Surveillance.*
 > European Commission, Joint Research Centre (JRC).
 > **Submitted to Frontiers in Public Health** (DOI to be assigned upon publication).
 
