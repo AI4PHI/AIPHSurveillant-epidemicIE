@@ -8,7 +8,9 @@
 #     conda activate epidemic-ie
 #
 # The conda part is Python 3.12.3 + system libraries only; everything else (torch, transformers,
-# peft, bitsandbytes, pandas, rdflib, ...) comes from the pip section at the end of this file.
+# peft, bitsandbytes, pandas, rdflib, gradio, pyvis, ...) comes from the pip section at the end of
+# this file. gradio and pyvis are the extra dependencies of app.py, the Gradio demo behind
+# https://jrc-ai-epidemicie.hf.space (pyvis also pulls in jsonpickle for the knowledge-graph view).
 # torch is the CUDA 13.0 build ("+cu130"), which is not on PyPI: on a machine where conda cannot
 # resolve it, install the pip part with
 #     pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu130
@@ -117,6 +119,7 @@ dependencies:
       - frozenlist==1.8.0
       - fsspec==2025.9.0
       - future==1.0.0
+      - gradio==5.49.1
       - greenlet==3.5.5
       - h11==0.16.0
       - hf-xet==1.7.0
@@ -140,6 +143,7 @@ dependencies:
       - joblib==1.5.3
       - json5==0.13.0
       - jsonpatch==1.33
+      - jsonpickle==3.4.2
       - jsonpointer==3.0.0
       - jsonschema==4.26.0
       - jsonschema-specifications==2025.9.1
@@ -234,6 +238,7 @@ dependencies:
       - python-dateutil==2.9.0.post0
       - python-json-logger==4.0.0
       - pytz==2025.2
+      - pyvis==0.3.2
       - PyYAML==6.0.3
       - pyzmq==27.1.0
       - rdflib==7.6.0

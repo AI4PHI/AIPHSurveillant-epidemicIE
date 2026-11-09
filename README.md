@@ -63,6 +63,7 @@ resumes from the first day that has not been fully computed yet.
 | `llmquery.py` | Helpers for OpenAI-compatible LLM APIs (optional remote backends; the main extraction is local). |
 | `eios_client.py` | EIOS API client (OAuth2 client-credentials auth, article retrieval). |
 | `serving_format.py` | Prompt/chat-template and generation settings for the fine-tuned model. |
+| `app.py` | Gradio demo app (the code behind the public demo at <https://jrc-ai-epidemicie.hf.space>): paste an outbreak report and see the extracted records as a graph, a table and JSON. |
 | `virtuosoQueryRest.py` | REST client for the Virtuoso SPARQL endpoint, with on-disk query cache. |
 | `jrc_research_data.py` | Publishes outputs as new versions of a research-data (InvenioRDM) record. |
 | `epidemicIE_PREAMBLE.ttl` | Ontology preamble (ECMO-based) read at run time; source file of the project. |
@@ -145,6 +146,32 @@ To exercise the EIOS API client (requires a valid `config.py`):
 ```bash
 python tests/eios_api_test.py
 python tests/eios_api_test_extractions.py
+```
+
+## Interactive demo app
+
+`app.py` is a small [Gradio](https://www.gradio.app/) application that demonstrates the extraction
+model on its own, independently of the daily pipeline. It is the code behind the public demo at
+<https://jrc-ai-epidemicie.hf.space>. You paste the text of a WHO Disease Outbreak News report into
+the text box, click **Extract**, and the fine-tuned model (EpiQwen3.5-9B) returns the structured
+outbreak records it finds, shown three ways: as a table, as JSON, and as a small knowledge graph
+(outbreaks in red; shared diseases and places link outbreaks of the same report). A few example
+reports are pre-loaded so you can try it without pasting anything.
+
+Run it locally:
+
+```bash
+python app.py
+```
+
+This serves the app on <http://localhost:7860>. As with the pipeline, the model is loaded and run
+**locally**, so a CUDA-capable GPU is recommended; the first run downloads the model weights from
+the Hugging Face Hub. Useful flags:
+
+```bash
+python app.py --share True          # also expose a temporary public gradio.live link
+python app.py --port 7861           # serve on a different port
+CUDA_VISIBLE_DEVICES=1 python app.py # pick a specific GPU
 ```
 
 ## Data and model availability

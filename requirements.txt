@@ -16,6 +16,8 @@
 #                                                           and the on-disk cache of the SPARQL queries
 #   schedule                                             -> SCHEDULE-RUN_AutomatedDynamicPipeline.py
 #   python-dateutil, tqdm, openai, tiktoken              -> date parsing, progress bars, legacy LLM calls
+#   gradio, pyvis                                        -> app.py, the Gradio demo (https://jrc-ai-epidemicie.hf.space)
+#                                                           (pyvis pulls in jsonpickle for the knowledge-graph view)
 #
 # Frozen again on 2026-10-12, when the environment was upgraded for the extraction model
 # jattokatarratto/EpiQwen3.5-9B: its base model Qwen/Qwen3.5-9B is only known to transformers from
@@ -91,6 +93,7 @@ fqdn==1.5.1
 frozenlist==1.8.0
 fsspec==2025.9.0
 future==1.0.0
+gradio==5.49.1
 greenlet==3.5.5
 h11==0.16.0
 hf-xet==1.7.0
@@ -114,6 +117,7 @@ Jinja2==3.1.6
 joblib==1.5.3
 json5==0.13.0
 jsonpatch==1.33
+jsonpickle==3.4.2
 jsonpointer==3.0.0
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
@@ -208,6 +212,7 @@ pyparsing==3.3.2
 python-dateutil==2.9.0.post0
 python-json-logger==4.0.0
 pytz==2025.2
+pyvis==0.3.2
 PyYAML==6.0.3
 pyzmq==27.1.0
 rdflib==7.6.0
